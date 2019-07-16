@@ -1,18 +1,25 @@
-from review_tool1 import Ui_MainWindow
+from review_tool import Ui_MainWindow
 from benchmark_win import Ui_message_box
 from PyQt5 import QtGui,QtWidgets,QtCore
 import sys
 import hashlib
 
 class main_window(QtWidgets.QMainWindow,Ui_MainWindow):
+
     def __init__(self,parent=None):
         super(main_window,self).__init__(parent)
         self.setupUi(self)
         self.commandLinkButton.clicked.connect(self.open_benchmark)
         self.pushButton_3.clicked.connect(self.open_file)
         self.pushButton.clicked.connect(self.get_analysis)
+        self.tabWidget = QtWidgets.QTableWidget()
         finish = QtWidgets.QAction("Quit", self)
         finish.triggered.connect(self.close_event)
+        self.actionConnect_To_IP.setShortcut('Ctrl+S')
+        self.actionConnect_To_IP.triggered.connect(self.saveFile)
+        self.actionExit_2.setShortcut('Ctrl+W')
+        self.actionExit_2.triggered.connect(self.close_event)
+
 
     def open_benchmark(self):
         bench_window = benchmark_window()
@@ -30,21 +37,24 @@ class main_window(QtWidgets.QMainWindow,Ui_MainWindow):
 
     def close_event(self):
         close_response = showmessagebox(1)
-        print(1)
-        if close_response == Yes:
-            event.accept()
-        else:
-            event.ignore()
+        if close_response == 16384:
             self.close()
-            self.window = main_window()
-            self.window.show()
+            sys.exit()
+        else:
+            pass
 
     def get_analysis(self):
-        print(1)
+        import pycodestyle
+        fchecker = pycodestyle.Checker(self.file_name, show_source=True)
+        file_errors = fchecker.check_all()
 
+    def saveFile(self):
+        name = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File')
+        with open(name[0], 'w') as file:
+            text = self.textBrowser.toPlainText()
+            file.write(text)
 
-
-
+    
 
 def showmessagebox(x):
     msg = QtWidgets.QMessageBox()

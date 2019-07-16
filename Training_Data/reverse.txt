@@ -1,3 +1,12 @@
-for i in range(10):
-    for j in range(11):
-        print(1)
+def multiplyList(myList) :
+
+    # Multiply elements one by one
+    result = 1
+    for x in myList:
+         result = result * x
+    return result
+
+# Driver code
+list1, list2 = [1, 2, 3], [3, 2, 4]
+print(multiplyList(list1))
+print(multiplyList(list2))
