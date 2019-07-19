@@ -2,6 +2,8 @@ from review_tool import Ui_MainWindow
 from benchmark_win import Ui_message_box
 from PyQt5 import QtGui,QtWidgets,QtCore
 import sys
+import platform
+import os
 import hashlib
 
 class main_window(QtWidgets.QMainWindow,Ui_MainWindow):
@@ -44,9 +46,10 @@ class main_window(QtWidgets.QMainWindow,Ui_MainWindow):
             pass
 
     def get_analysis(self):
-        import pycodestyle
-        fchecker = pycodestyle.Checker(self.file_name, show_source=True)
-        file_errors = fchecker.check_all()
+
+        if platform.system() == 'Windows':
+            print(os.system('pycodestyle --statistics -qq ' + self.file_name))
+
 
     def saveFile(self):
         name = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File')
