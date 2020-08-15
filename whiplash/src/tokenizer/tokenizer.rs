@@ -19,12 +19,13 @@ impl<'a> Tokenizer<'a> {
 
         let mut result: Vec<Token> = Vec::new();
         for mut tokens in line
+            .trim_end()
             .split(|c: char| c.is_whitespace() || self.symbols_to_ignore.contains(&c))
             .map(|x| self.identify_tokens(x)) {
                 result.append(&mut tokens);
             }
 
-        result
+        self.sanitize(result)
     }
     
     /// Classifies token according to TokenType
@@ -37,6 +38,7 @@ impl<'a> Tokenizer<'a> {
         let lexemes = self.split_lexeme(s);
 
         for lexeme in lexemes {
+            // println!("{}", lexeme);
             // List of types: op, num, bool, keyword, id
             if lexeme.parse::<f64>().is_ok() {
                 tokens.push(Token::new(TokenType::NUM, lexeme));
@@ -64,9 +66,11 @@ impl<'a> Tokenizer<'a> {
             }
         }
 
-        self.sanitize(tokens)
+        tokens
     }
 
+    /// Merges two separate tokens if they should actually be a single token
+    /// For instance, =, = is merged to ==
     fn sanitize(&'a self, tokens: Vec<Token<'a>>) -> Vec<Token> {
         let mut result = Vec::new();
         let mut this_is_pushed = false;
@@ -100,6 +104,10 @@ impl<'a> Tokenizer<'a> {
 
                     } else if token.value == ">" {
                         result.push(Token::new(TokenType::OP, ">>"));
+                        continue;
+
+                    } else if token.value == "=" {
+                        result.push(Token::new(TokenType::OP, "=="));
                         continue;
 
                     } else {
@@ -153,6 +161,8 @@ impl<'a> Tokenizer<'a> {
         false
     }
 
+    /// Splits a lexeme such as a+b into a, +, b
+    /// Since it only inspects one element at a time, lexemes such as == will be split into two and need to be sanitized
     fn split_lexeme(&'a self, lexeme: &'a str) -> Vec<&'a str> {
         // Check symbols_to_include, operators, parentheses
         let token_checks = [
@@ -168,12 +178,18 @@ impl<'a> Tokenizer<'a> {
 
         let mut result: Vec<&str> = Vec::new();
         let mut last = 0;
+        let mut entered_loop = false;
         for (index, matched) in lexeme.match_indices(|c: char| one_char_tokens.contains(&&&c.to_string()[..])) {
+            entered_loop = true;
             if last != index {
                 result.push(&lexeme[last..index]);
             }
             result.push(matched);
             last = index + matched.len();
+        }
+
+        if !entered_loop {
+            result.push(lexeme);
         }
 
         result
