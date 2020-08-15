@@ -1,4 +1,4 @@
-use crate::tokenizer::token::*;
+use crate::lexical_analyser::token::*;
 
 pub struct Node {
     // pub token: Box<Token>,
