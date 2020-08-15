@@ -4,7 +4,9 @@ use crate::tokenizer::token::{Token, TokenType};
 pub struct Tokenizer<'a> {
     keywords: Vec<&'a str>,
     operators: Vec<&'a str>,
-    symbols: Vec<char>,
+    symbols_to_ignore: Vec<char>,
+    symbols_to_include: Vec<&'a str>,
+    parenthesis: Vec<&'a str>,
 }
 
 impl<'a> Tokenizer<'a> {
@@ -15,35 +17,166 @@ impl<'a> Tokenizer<'a> {
             return vec![]
         }
 
-        line
-            .split(|c: char| c.is_whitespace() || self.symbols.contains(&c))
-            .map(|x| self.identify_tokens(x))
-            .collect()
+        let mut result: Vec<Token> = Vec::new();
+        for mut tokens in line
+            .split(|c: char| c.is_whitespace() || self.symbols_to_ignore.contains(&c))
+            .map(|x| self.identify_tokens(x)) {
+                result.append(&mut tokens);
+            }
+
+        result
     }
     
     /// Classifies token according to TokenType
     /// tokenize_line() splits line by symbol/whitespace, but other tokens might be present
     /// identify_token() will further split the result into tokens and tokenize
-    fn identify_tokens(&'a self, s: &'a str) -> Token {
-        let tokens: Vec<Token> = Vec::new();
-        
+    fn identify_tokens(&'a self, s: &'a str) -> Vec<Token> {
+        let mut tokens: Vec<Token> = Vec::new();
 
+        // Split a lexeme that might contain multiple lexemes
+        let lexemes = self.split_lexeme(s);
 
-        // List of types: var, op, num, bool, keyword, id
-        if s.parse::<f64>().is_ok() {
-            return Token::new(TokenType::NUM, s);
-        } else if self.keywords.contains(&s) {
-            return Token::new(TokenType::KEYWORD, s);
-        } else if ["True", "False"].contains(&s) {
-            return Token::new(TokenType::BOOL, s);
-        } else if self.operators.contains(&s) {
-            return Token::new(TokenType::OP, s);
+        for lexeme in lexemes {
+            // List of types: op, num, bool, keyword, id
+            if lexeme.parse::<f64>().is_ok() {
+                tokens.push(Token::new(TokenType::NUM, lexeme));
+
+            } else if self.keywords.contains(&lexeme) {
+                tokens.push(Token::new(TokenType::KEYWORD, lexeme));
+
+            } else if ["True", "False"].contains(&lexeme) {
+                tokens.push(Token::new(TokenType::BOOL, lexeme));
+
+            } else if self.operators.contains(&lexeme) {
+                tokens.push(Token::new(TokenType::OP, lexeme));
+
+            } else if self.symbols_to_include.contains(&lexeme) {
+                tokens.push(Token::new(TokenType::SYM, lexeme));
+
+            } else if self.parenthesis.contains(&lexeme) {
+                tokens.push(Token::new(TokenType::PAR, lexeme));
+
+            } else if self.is_literal(&lexeme) {
+                tokens.push(Token::new(TokenType::LIT, lexeme));
+
+            } else {
+                tokens.push(Token::new(TokenType::ID, lexeme));
+            }
         }
-        Token::new(TokenType::ID, s)
+
+        self.sanitize(tokens)
     }
 
-    fn split_lexeme(lexeme: &'a str) -> Vec<&'a str> {
-        vec![]
+    fn sanitize(&'a self, tokens: Vec<Token<'a>>) -> Vec<Token> {
+        let mut result = Vec::new();
+        let mut this_is_pushed = false;
+        
+        for (i, token) in tokens.iter().enumerate() {
+            if i == tokens.len() - 1 {
+                result.push(*token);
+                break;
+            }
+            if this_is_pushed {
+                this_is_pushed = false;
+                continue;
+            }
+
+            if let TokenType::OP = token.category {
+                let next_tok = &tokens[i+1];
+
+                if *token == *next_tok {
+                    this_is_pushed = true;
+                    if token.value == "/" {
+                        result.push(Token::new(TokenType::OP, "//" ));
+                        continue;
+
+                    } else if token.value == "*" {
+                        result.push(Token::new(TokenType::OP, "**"));
+                        continue;
+
+                    } else if token.value == "<" {
+                        result.push(Token::new(TokenType::OP, "<<"));
+                        continue;
+
+                    } else if token.value == ">" {
+                        result.push(Token::new(TokenType::OP, ">>"));
+                        continue;
+
+                    } else {
+                        this_is_pushed = false;
+                    }
+
+                } else if next_tok.value == "=" {
+                    this_is_pushed = true;
+                    if token.value == "<" {
+                        result.push(Token::new(TokenType::OP, "<="));
+                        continue;
+
+                    } else if token.value == ">" {
+                        result.push(Token::new(TokenType::OP, ">="));
+                        continue;
+
+                    } else if token.value == "!" {
+                        result.push(Token::new(TokenType::OP, "!="));
+                        continue;
+
+                    } else {
+                        this_is_pushed = false;
+                    }
+                } 
+            }
+
+            result.push(*token);
+        }
+
+        result
+    }
+
+    fn is_literal(&'a self, s: &&str) -> bool {
+        
+        if (s.starts_with("\"") || 
+            s.starts_with("b\"") || 
+            s.starts_with("r\"") || 
+            s.starts_with("u\""))
+            && s.ends_with("\"") {
+                return true;
+
+        } else if (s.starts_with("\'") || 
+            s.starts_with("b\'") || 
+            s.starts_with("r\'") || 
+            s.starts_with("u\'"))
+            && s.ends_with("\'") {
+                return true;
+
+        }
+
+        false
+    }
+
+    fn split_lexeme(&'a self, lexeme: &'a str) -> Vec<&'a str> {
+        // Check symbols_to_include, operators, parentheses
+        let token_checks = [
+            &self.symbols_to_include[..],
+            &self.operators[..],
+            &self.parenthesis[..],
+        ].concat();
+
+        let one_char_tokens: Vec<&&str> = token_checks
+            .iter()
+            .filter(|x| x.chars().count() == 1)
+            .collect();
+
+        let mut result: Vec<&str> = Vec::new();
+        let mut last = 0;
+        for (index, matched) in lexeme.match_indices(|c: char| one_char_tokens.contains(&&&c.to_string()[..])) {
+            if last != index {
+                result.push(&lexeme[last..index]);
+            }
+            result.push(matched);
+            last = index + matched.len();
+        }
+
+        result
     }
     
     /// Instantiates a Tokenizer
@@ -110,13 +243,31 @@ impl<'a> Tokenizer<'a> {
         ];
 
         // List of symbols
-        let symbols = vec![
+        let symbols_to_ignore = vec![
             ',',
-            '(',
-            ')'
         ];
 
-        Tokenizer {keywords, operators, symbols}
+        let parenthesis = vec![
+            "(",
+            ")",
+            "{",
+            "}",
+            "[",
+            "]",
+        ];
+
+        let symbols_to_include = vec![
+            ":",
+            "\'\'\'",
+        ];
+
+        Tokenizer {
+            keywords, 
+            operators, 
+            symbols_to_ignore, 
+            symbols_to_include, 
+            parenthesis
+        }
     }
     
 }
