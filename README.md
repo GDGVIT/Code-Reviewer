@@ -2,7 +2,7 @@
 A code-optimizer for Python.
 
 ### Issues/To-Do
-- Tokenizer splits at all whitespaces - problematic for whitespace inside a literal
+- Test Tokenizer
 - AST Implementation
 
 ## To test - 
