@@ -3,7 +3,7 @@ use std::fs;
 use std::io::{self, prelude::*};
 
 mod lexical_analyser;
-mod ast;
+mod parser;
 
 fn main() -> io::Result<()> {
     let file = fs::File::open("../test1.py")?;
