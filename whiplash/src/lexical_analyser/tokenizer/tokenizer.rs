@@ -8,6 +8,7 @@ pub struct Tokenizer<'a> {
     pub symbols_to_ignore: Vec<char>,
     pub symbols_to_include: Vec<&'a str>,
     pub parenthesis: Vec<&'a str>,
+    pub whitespaces: Vec<&'a str>,
 }
 
 impl<'a> Tokenizer<'a> {
@@ -115,12 +116,22 @@ impl<'a> Tokenizer<'a> {
             "\'\'\'",
         ];
 
+        let whitespaces = vec![
+            " ",
+            "\t",
+            "\n",
+            "\r",
+            // "\v", // \x0b
+            // "\f", // \x0c
+        ];
+
         Tokenizer {
             keywords, 
             operators, 
             symbols_to_ignore, 
             symbols_to_include, 
-            parenthesis
+            parenthesis,
+            whitespaces,
         }
     }
     

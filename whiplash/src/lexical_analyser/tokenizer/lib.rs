@@ -1,5 +1,6 @@
 use crate::lexical_analyser::tokenizer::tokenizer::*;
 use crate::lexical_analyser::token::{token::*, tokentype::*};
+use crate::lexical_analyser::tokenizer::helpers::*;
 
 impl<'a> Tokenizer<'a> {
     /// Tokenizes a single line of code
@@ -9,62 +10,120 @@ impl<'a> Tokenizer<'a> {
         }
 
         let mut result: Vec<Token> = Vec::new();
-        for mut tokens in line
-            .trim()
-            .split(|c: char| c.is_whitespace() || self.symbols_to_ignore.contains(&c))
-            .map(|x| self.identify_tokens(x)) {
-                result.append(&mut tokens);
-        }
+        
+        for token in self
+            .separate_lexemes(line)
+            .iter()
+            .map(|x| self.identify_token(x.to_string())) {
+                result.push(token);
+        } 
         
         // println!("{:?}", result);
         Self::sanitize(result)
     }
+
+    fn separate_lexemes(&'a self, line: &'a str) -> Vec<String> {
+        let mut buffer = String::from("");
+        let mut result = Vec::new();
+        let mut isl = InStringLit {
+            in_string_literal: false,
+            terminal: None,
+        };
+
+        let split_tokens = [
+            &self.symbols_to_include[..],
+            &self.operators[..],
+            &self.parenthesis[..],
+        ].concat();
+
+        let separators_to_include: Vec<&&str> = split_tokens
+            .iter()
+            .filter(|x| x.chars().count() == 1)
+            .collect();
+
+        for c in line.chars() {
+            if isl.in_string_literal {
+                buffer.push(c);
+                if c == isl.terminal.unwrap() {
+                    isl.set(false, None);
+                    result.push(buffer.clone());
+                    buffer = "".to_string();
+                }
+
+            } else {
+                if c == '\"' || c == '\'' {
+                    isl.set(true, Some(c));
+                    if buffer != "".to_string() {
+                        result.push(buffer.clone());
+                    }
+                    buffer = c.to_string();
+
+                } else if separators_to_include.contains(&&&c.to_string()[..]) {
+                    if buffer != "".to_string() {
+                        result.push(buffer.clone());
+                    }
+                    result.push(c.to_string());
+                    buffer = "".to_string();
+
+                } else if 
+                    c.is_whitespace() ||
+                    self.symbols_to_ignore.contains(&c) {
+                        if buffer != "".to_string() {
+                            result.push(buffer.clone());
+                            buffer = "".to_string();
+                        }
+
+                } else {
+                    buffer.push(c);
+
+                }
+            }
+        }
+        if buffer != "".to_string() {
+            result.push(buffer.clone());
+        }
+
+        result
+    }
     
     /// Classifies token according to TokenType
-    fn identify_tokens(&'a self, s: &'a str) -> Vec<Token> {
-        let mut tokens: Vec<Token> = Vec::new();
+    fn identify_token(&'a self, lexeme: String) -> Token {
+        let s = &lexeme[..];
+        // println!("Lexeme: {}", lexeme);
+        // List of types: op, num, bool, keyword, id
+        if lexeme.parse::<f64>().is_ok() {
+            return Token::new(TokenType::NUM, lexeme);
 
-        // Split a lexeme that might contain multiple lexemes
-        let lexemes = self.split_lexeme(s);
-        // println!("Lexemes are: {:?}", lexemes);
+        } else if self.keywords.contains(&s) {
+            return Token::new(TokenType::KEYWORD, lexeme);
 
-        for lexeme in lexemes {
-            // println!("{}", lexeme);
-            // List of types: op, num, bool, keyword, id
-            if lexeme.parse::<f64>().is_ok() {
-                tokens.push(Token::new(TokenType::NUM, lexeme));
+        } else if ["True", "False"].contains(&s) {
+            return Token::new(TokenType::BOOL, lexeme);
 
-            } else if self.keywords.contains(&lexeme) {
-                tokens.push(Token::new(TokenType::KEYWORD, lexeme));
+        } else if self.operators.contains(&s) {
+            return Token::new(TokenType::OP, lexeme);
 
-            } else if ["True", "False"].contains(&lexeme) {
-                tokens.push(Token::new(TokenType::BOOL, lexeme));
+        } else if self.symbols_to_include.contains(&s) {
+            return Token::new(TokenType::SYM, lexeme);
 
-            } else if self.operators.contains(&lexeme) {
-                tokens.push(Token::new(TokenType::OP, lexeme));
+        } else if self.parenthesis.contains(&s) {
+            return Token::new(TokenType::PAR, lexeme);
 
-            } else if self.symbols_to_include.contains(&lexeme) {
-                tokens.push(Token::new(TokenType::SYM, lexeme));
-
-            } else if self.parenthesis.contains(&lexeme) {
-                tokens.push(Token::new(TokenType::PAR, lexeme));
-
-            } else if Self::is_literal(&lexeme) {
-                tokens.push(Token::new(TokenType::LIT, lexeme));
-            
-            } else {
-                tokens.push(Token::new(TokenType::ID, lexeme));
-            }
-            // println!("Token pushed into tokens list: {:?}", tokens.last());
+        } else if Self::is_literal(&s) {
+            return Token::new(TokenType::LIT, lexeme);
+        
+        } else {
+            return Token::new(TokenType::ID, lexeme);
         }
-        tokens
     }
 
     /// Merges two separate tokens if they should actually be a single token
     /// For instance, Token(OP, "="), Token(OP, "=") is merged to Token(OP, "==")
-    fn sanitize(tokens: Vec<Token<'a>>) -> Vec<Token> {
-        let mut result = Vec::new();
+    fn sanitize(tokens: Vec<Token>) -> Vec<Token> {
+
+        let mut result: Vec<Token> = Vec::new();
         let mut this_is_pushed = false;
+        let total_tokens = tokens.len();
         
         for (i, token) in tokens.iter().enumerate() {
             // Token identification might erroneously include empty strings as tokens. 
@@ -74,8 +133,8 @@ impl<'a> Tokenizer<'a> {
             }
 
             // Last token does not merge with a succeeding token, simply push
-            if i == tokens.len() - 1 {
-                result.push(*token);
+            if i == total_tokens - 1 {
+                result.push(token.clone());
                 break;
             }
 
@@ -85,29 +144,29 @@ impl<'a> Tokenizer<'a> {
                 continue;
             }
 
+            let next_tok = &tokens[i+1];
             if let TokenType::OP = token.category {
-                let next_tok = &tokens[i+1];
 
                 if *token == *next_tok {
                     this_is_pushed = true;
                     if token.value == "/" {
-                        result.push(Token::new(TokenType::OP, "//" ));
+                        result.push(Token::new(TokenType::OP, "//" .to_string()));
                         continue;
 
                     } else if token.value == "*" {
-                        result.push(Token::new(TokenType::OP, "**"));
+                        result.push(Token::new(TokenType::OP, "**".to_string()));
                         continue;
 
                     } else if token.value == "<" {
-                        result.push(Token::new(TokenType::OP, "<<"));
+                        result.push(Token::new(TokenType::OP, "<<".to_string()));
                         continue;
 
                     } else if token.value == ">" {
-                        result.push(Token::new(TokenType::OP, ">>"));
+                        result.push(Token::new(TokenType::OP, ">>".to_string()));
                         continue;
 
                     } else if token.value == "=" {
-                        result.push(Token::new(TokenType::OP, "=="));
+                        result.push(Token::new(TokenType::OP, "==".to_string()));
                         continue;
 
                     } else {
@@ -117,61 +176,26 @@ impl<'a> Tokenizer<'a> {
                 } else if next_tok.value == "=" {
                     this_is_pushed = true;
                     if token.value == "<" {
-                        result.push(Token::new(TokenType::OP, "<="));
+                        result.push(Token::new(TokenType::OP, "<=".to_string()));
                         continue;
 
                     } else if token.value == ">" {
-                        result.push(Token::new(TokenType::OP, ">="));
-                        continue;
-
-                    } else if token.value == "!" {
-                        result.push(Token::new(TokenType::OP, "!="));
+                        result.push(Token::new(TokenType::OP, ">=".to_string()));
                         continue;
 
                     } else {
                         this_is_pushed = false;
                     }
                 } 
+            } else if token.value == "!" && next_tok.value == "=" {
+                this_is_pushed = true;
+                result.push(Token::new(TokenType::OP, "!=".to_string()));
+                continue;
             }
 
-            result.push(*token);
+            result.push(token.clone());
         }
 
-        result
-    }
-
-    /// Splits a lexeme such as a+b into a, +, b
-    /// 
-    /// tokenize_line() splits line by symbol/whitespace, which mean lexemes that are not space separated need to be separated.
-    /// This function inspects only one element at a time, lexemes such as == will be split into two and need to be sanitized
-    /// Using Tokenizer::sanitize()
-    pub fn split_lexeme(&'a self, lexeme: &'a str) -> Vec<&'a str> {
-        // Check symbols_to_include, operators, parentheses
-        let token_checks = [
-            &self.symbols_to_include[..],
-            &self.operators[..],
-            &self.parenthesis[..],
-        ].concat();
-
-        let one_char_tokens: Vec<&&str> = token_checks
-            .iter()
-            .filter(|x| x.chars().count() == 1)
-            .collect();
-
-        let mut result: Vec<&str> = Vec::new();
-        let mut last = 0;
-        // println!("Lexeme: {:?}", lexeme);
-        for (index, matched) in lexeme.match_indices(|c: char| one_char_tokens.contains(&&&c.to_string()[..])) {
-            if last != index {
-                result.push(&lexeme[last..index]);
-                // println!("Part before match: {}", &lexeme[last..index]);
-            }
-            result.push(matched);
-            last = index + matched.len();
-            // println!("Matched part: {}", matched);
-        }
-
-        result.push(&lexeme[last..]);
         result
     }
 }
