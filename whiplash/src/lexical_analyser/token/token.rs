@@ -1,14 +1,14 @@
 use crate::lexical_analyser::token::tokentype::{TokenType};
 
 #[derive(Debug)]
-#[derive(Copy, Clone)]
-pub struct Token<'a> {
+#[derive(Clone)]
+pub struct Token {
     pub category: TokenType,
-    pub value: &'a str,
+    pub value: String,
 }
 
-impl<'a> Token<'a> {
-    pub fn new(category: TokenType, value: &'a str) -> Token {
+impl Token {
+    pub fn new(category: TokenType, value: String) -> Token {
         Token {
             category,
             value
@@ -16,7 +16,7 @@ impl<'a> Token<'a> {
     }
 }
 
-impl<'a> PartialEq for Token<'a> {
+impl PartialEq for Token {
     fn eq(&self, other: &Self) -> bool {
         self.category == other.category && self.value == other.value
     }
