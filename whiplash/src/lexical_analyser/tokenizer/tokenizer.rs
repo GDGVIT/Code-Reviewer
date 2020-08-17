@@ -98,9 +98,7 @@ impl<'a> Tokenizer<'a> {
         ];
 
         // List of symbols
-        let symbols_to_ignore = vec![
-            ',',
-        ];
+        let symbols_to_ignore = vec![];
 
         let parenthesis = vec![
             "(",
@@ -114,6 +112,7 @@ impl<'a> Tokenizer<'a> {
         let symbols_to_include = vec![
             ":",
             "\'\'\'",
+            ",",
         ];
 
         let whitespaces = vec![
