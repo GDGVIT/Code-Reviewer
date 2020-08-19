@@ -87,7 +87,7 @@ impl<'a> Tokenizer<'a> {
     }
     
     /// Classifies token according to TokenType
-    fn identify_token(&'a self, lexeme: String) -> Token {
+    pub fn identify_token(&'a self, lexeme: String) -> Token {
         let s = &lexeme[..];
         // println!("Lexeme: {}", lexeme);
         // List of types: op, num, bool, keyword, id
