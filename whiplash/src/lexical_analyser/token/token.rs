@@ -1,4 +1,5 @@
 use crate::lexical_analyser::token::tokentype::{TokenType};
+use crate::lexical_analyser::tokenizer::tokenizer::Tokenizer;
 
 #[derive(Debug)]
 #[derive(Clone)]
@@ -13,6 +14,11 @@ impl Token {
             category,
             value
         }
+    }
+
+    pub fn from(s: String) -> Token {
+        let tokenizer = Tokenizer::new();
+        tokenizer.identify_token(s)
     }
 }
 
