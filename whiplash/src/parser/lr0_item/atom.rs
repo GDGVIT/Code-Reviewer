@@ -9,24 +9,35 @@ pub enum Atom {
 }
 
 impl fmt::Debug for Atom {
-    pub fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match Atom {
-            Var(a) => write!(f, "{:?}", a),
-            Tok(a) => write!(f, "{:?}", a),
-            Dot => write!(f, ".")
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match &self {
+            Atom::Var(a) => write!(f, "{:?}", a),
+            Atom::Tok(a) => write!(f, "{:?}", a),
+            Atom::Dot => write!(f, ".")
         }
     }
 }
 
-pub type Atoms = Vec<Atom>;
+pub struct Atoms {
+    vals: Vec<Atom>
+}
 
-impl fmt::Debug for Vec<Atom> {
-    pub fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl Atoms {
+    pub fn from(v: Vec<Atom>) -> Atoms {
+        Atoms {
+            vals: v
+        }
+    }
+}
+
+impl fmt::Debug for Atoms {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            &self.iter().fold(
+            "{}",
+            &self.vals.iter().fold(
                 String::new(), 
-                |acc, &atom| acc + dbg!(&atom) + " "
+                |acc, atom| acc + &format!("{:?}", &atom)[..] + " "
             )
         )
     }

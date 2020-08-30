@@ -1,13 +1,14 @@
 use crate::parser::node::nodetype::NodeType;
-use super::atom::Atom;
+use super::atom::Atoms;
+use std::fmt;
 
 pub struct Item {
-    lhs: NodeType,
-    rhs: Vec<Atom>
+    pub lhs: NodeType,
+    pub rhs: Atoms
 }
 
-// impl fmt::Debug for Item {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(f, )
-//     }
-// }
+impl fmt::Debug for Item {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?} -> {:?}", self.lhs, self.rhs)
+    }
+}
