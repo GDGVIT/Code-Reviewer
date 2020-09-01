@@ -2,6 +2,10 @@ use crate::lexical_analyser::tokenizer::tokenizer::Tokenizer;
 use std::fs;
 use std::io::{self, prelude::*};
 
+extern crate strum;
+#[macro_use]
+extern crate strum_macros;
+
 mod lexical_analyser;
 mod parser;
 
