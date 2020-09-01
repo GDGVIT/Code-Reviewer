@@ -5,6 +5,7 @@ use std::error::Error;
 use regex::Regex;
 
 impl Grammar {
+    /// Parse a grammar specification file into a grammar
     pub fn from_file(filename: String) -> Result<(), Box<dyn Error>> {
         let contents = fs::read_to_string(filename)?;
 
@@ -13,14 +14,21 @@ impl Grammar {
         Ok(())
     }
 
+    /// Extract rules from a single line of input
     fn rules_from_line(line: &str) -> Vec<Rule> {
         let rules_found = vec![];
-        let re = regex::Regex::new(r":|\)\*|\]\*|\)|\]|\(|\[| |\|").unwrap();
 
+        // Regex to divide grammar notation into symbols. Based on 
+        // https://stackoverflow.com/questions/6462578/regex-to-match-all-instances-not-inside-quotes
+        let re = regex::Regex::new(r"'[^']+'|(:|\)\*|\]\*|\)|\]|\(|\[| |\|)").unwrap();
+        let tokenized_line = Self::split_keep(&re, line);
         rules_found
     }
 
+    /// Splits string according to regex and includes delimiters in output
+    /// Ignores whitespaces
     fn split_keep<'a>(r: &Regex, text: &'a str) -> Vec<&'a str> {
+        // Based on https://stackoverflow.com/questions/56921637/how-do-i-split-a-string-using-a-rust-regex-and-keep-the-delimiters
         let mut result = Vec::new();
         let mut last = 0;
         for mat in r.find_iter(text) {
@@ -41,5 +49,6 @@ impl Grammar {
         }
         result
     }
+
     
 }
