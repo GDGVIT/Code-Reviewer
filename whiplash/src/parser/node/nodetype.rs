@@ -1,6 +1,8 @@
+use strum::IntoEnumIterator;
+
 #[allow(non_camel_case_types)]
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, EnumIter)]
 pub enum NodeType {
     simple_stmt,
     expr_stmt,
