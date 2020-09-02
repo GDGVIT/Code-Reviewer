@@ -12,3 +12,12 @@ impl fmt::Debug for Rule {
         write!(f, "{:?} -> {:?}", self.start_symbol, self.rhs)
     }
 }
+
+impl Rule {
+    pub fn from(start_symbol: NodeType, rhs: Atoms) -> Rule {
+        Rule {
+            start_symbol,
+            rhs
+        }
+    }
+}
