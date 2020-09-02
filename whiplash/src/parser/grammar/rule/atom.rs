@@ -1,10 +1,11 @@
 use std::fmt;
 use crate::parser::node::nodetype::NodeType;
-use crate::lexical_analyser::token::tokentype::TokenType;
+use crate::lexical_analyser::token::token::Token;
 
+#[derive(Clone)]
 pub enum Atom {
     Var(NodeType),
-    Tok(TokenType)
+    Tok(Token)
 }
 
 impl fmt::Debug for Atom {
@@ -17,7 +18,7 @@ impl fmt::Debug for Atom {
 }
 
 pub struct Atoms {
-    vals: Vec<Atom>
+    pub vals: Vec<Atom>
 }
 
 impl Atoms {
