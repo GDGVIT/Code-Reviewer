@@ -7,9 +7,9 @@ pub enum NodeType {
 }
 
 pub struct Node {
-    children: Vec<Box<Node>>,
-    nodetype: NodeType,
-    atoms: Atoms
+    pub children: Vec<Box<Node>>,
+    pub nodetype: NodeType,
+    pub atoms: Atoms
 }
 
 
