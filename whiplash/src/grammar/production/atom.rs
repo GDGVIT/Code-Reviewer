@@ -9,6 +9,16 @@ pub enum Atom {
     TokType(TokenType),
     Epsilon
 }
+impl Atom {
+    /// Returns value inside token if Atom variant is token; else returns None
+    pub fn get_token_value(&self) -> Option<String> {
+        if let Self::Tok(token) = self {
+            return Some(token.value);
+        }
+
+        None
+    }
+}
 
 impl fmt::Debug for Atom {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
