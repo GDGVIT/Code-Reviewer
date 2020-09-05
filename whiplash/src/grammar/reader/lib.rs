@@ -24,17 +24,11 @@ impl Grammar {
         // https://stackoverflow.com/questions/6462578/regex-to-match-all-instances-not-inside-quotes
         let re = regex::Regex::new(r"'[^']+'|(:|\)\*|\]\*|\)|\]|\(|\[| |\|)").unwrap();
         let lexemes = Self::split_keep(&re, line);
-        let lexemes: Vec<Option<_>> = lexemes
+        let atoms = production::Atoms::from( 
+                    lexemes
                         .iter()
                         .map(|lexeme| Self::atomize(lexeme))
-                        .collect();
-
-        if lexemes.iter().any(|&x| if let None = x {true} else {false}) {
-            return Err(InvalidError::from(line));
-        }
-
-        let atoms = production::Atoms::from(
-            lexemes.iter().map(|x| x.unwrap()).collect()
+                        .collect()
         );
 
         if !Self::check_valid(&atoms) {
@@ -70,35 +64,22 @@ impl Grammar {
         result
     }
 
-    fn atomize(lexeme: &str) -> Option<production::Atom> {
+    fn atomize(lexeme: &str) -> production::Atom {
         for ntype in NodeType::iter() {
             if stringify!(ntype) == lexeme {
-                return Some(production::Atom::Var(ntype));
+                return production::Atom::Var(ntype);
             }
         }
 
         for ttype in TokenType::iter() {
             if stringify!(ttype) == lexeme {
-                return Some(production::Atom::TokType(ttype));
+                return production::Atom::TokType(ttype);
             }
         }
 
-        if lexeme.starts_with('\'') && lexeme.ends_with('\'') {
-            // Take string inside quotes
-            let s: String = lexeme
-                                .chars()
-                                .skip(1)
-                                .take(lexeme.len() - 2)
-                                .collect();
-
-            return Some(
-                production::Atom::Tok(
-                    Token::from(s)
-                )
-            )
-        }
-        
-        None
+        production::Atom::Tok(
+            Token::from(lexeme.to_string())
+        )
     } 
 
     fn check_valid(atoms: &production::Atoms) -> bool {
