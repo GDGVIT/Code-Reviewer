@@ -12,7 +12,7 @@ impl Delim {
     }
 }
 
-pub fn is_inv_paren(p1: String, p2: String) -> bool {
-    (p1 == "(".to_string() && p2 == ")".to_string()) || 
-    (p1 == "[".to_string() && p2 == "]".to_string()) 
+pub fn is_inv_paren(p1: &String, p2: &String) -> bool {
+    (*p1 == "(".to_string() && *p2 == ")".to_string()) || 
+    (*p1 == "[".to_string() && *p2 == "]".to_string()) 
 }
