@@ -35,7 +35,7 @@ impl Node {
         let mut result = Node::new();
         let mut acc: Vec<Atom> = vec![];
 
-        for atom in node.atoms.vals.iter() {
+        for atom in node.atoms.vals.into_iter() {
             let val = if let Some(val) = atom.get_token_value() {
                 val
             } else {
@@ -47,33 +47,42 @@ impl Node {
                     delim.count += 1;
                     delim.paren = val;
 
+                    if val == "[".to_string() {
+                        acc.push(Atom::from_token("(".to_string()));
+                    }
                 } else {
                     result.children.push(
                         Box::new(
-                            Node::from(NodeType::Leaf, Atoms::from(vec![*atom]))
+                            Node::from(NodeType::Leaf, Atoms::from(vec![atom]))
                         )
                     )
                 }
             } else {
                 if val == delim.paren {
                     delim.count += 1;
-                    acc.push(*atom);
+                    acc.push(atom);
 
-                } else if is_inv_paren(delim.paren, val) {
+                } else if is_inv_paren(&delim.paren, &val) {
                     delim.count -= 1;
                     if delim.count == 0 {
+                        if val == "]".to_string() {
+                            acc.push(Atom::from_token(")".to_string()));
+                            acc.push(Atom::from_token("|".to_string()));
+                            acc.push(Atom::Epsilon);
+                        }
                         result.children.push(
                             Box::new(
                                 Node::from(NodeType::X, Atoms::from(acc))
                             )
                         );
                         acc = vec![];
+
                     } else {
-                        acc.push(*atom);
+                        acc.push(atom);
 
                     }
                 } else {
-                    acc.push(*atom)
+                    acc.push(atom)
                 }
             }
         }
