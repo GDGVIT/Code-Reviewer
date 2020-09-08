@@ -13,11 +13,16 @@ impl Atom {
     /// Returns value inside token if Atom variant is token; else returns None
     pub fn get_token_value(&self) -> Option<String> {
         if let Self::Tok(token) = self {
-            return Some(token.value);
+            return Some(token.value.clone());
         }
 
         None
     }
+
+    pub fn from_token(tok: String) -> Atom {
+        Atom::Tok(Token::from(tok))
+    }
+    
 }
 
 impl fmt::Debug for Atom {
@@ -39,6 +44,18 @@ impl Atoms {
     pub fn from(v: Vec<Atom>) -> Atoms {
         Atoms {
             vals: v
+        }
+    }
+
+    pub fn from_single_token(tok: String) -> Atoms {
+        Atoms {
+            vals: vec![Atom::from_token(tok)]
+        }
+    }
+
+    pub fn from_single_atom(a: Atom) -> Atoms {
+        Atoms {
+            vals: vec![a]
         }
     }
 }
