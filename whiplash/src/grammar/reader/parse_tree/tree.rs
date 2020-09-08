@@ -2,7 +2,7 @@ use super::{Node, NodeType};
 use crate::grammar::production::Atoms;
 
 pub struct Tree {
-    root: Box<Node>
+    pub root: Box<Node>
 }
 
 impl Tree {
