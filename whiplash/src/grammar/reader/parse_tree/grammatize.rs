@@ -20,7 +20,7 @@ impl Tree {
     fn to_rhs_list(current_node: Box<Node>) -> Vec<Atoms> {
         let mut out = vec![];
         for child in current_node.children.into_iter() {
-            let is_separator = format!("{:?}", child.atoms) == format!("{:?}", Atoms::from_single_token("|".to_string()));
+            let is_separator = child.atoms == Atoms::from_single_token("|".to_string());
 
             if let NodeType::X = child.nodetype {
                 out = Self::permute_concat(out, Self::to_rhs_list(child));
@@ -40,8 +40,8 @@ impl Tree {
         for prependee in &accumulated {
             for adjunct in &adjuncts {
                 // Check if adjunct or prependee are epsilon
-                let is_adjunct_epsilon = format!("{:?}", adjunct) == format!("{:?}", Atoms::from_single_atom(Atom::Epsilon));
-                let is_prependee_epsilon = format!("{:?}", prependee) == format!("{:?}", Atoms::from_single_atom(Atom::Epsilon));
+                let is_adjunct_epsilon = *adjunct == Atoms::from_single_atom(Atom::Epsilon);
+                let is_prependee_epsilon = *prependee == Atoms::from_single_atom(Atom::Epsilon);
 
                 if !is_adjunct_epsilon && !is_prependee_epsilon {
                     result.push(Atoms::from(
