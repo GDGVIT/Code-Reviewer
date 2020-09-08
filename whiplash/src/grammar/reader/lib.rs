@@ -12,7 +12,7 @@ impl Grammar {
         let contents = fs::read_to_string(filename)?;
 
         let lines: Vec<&str> = contents.lines().collect();
-        let productions = vec![];
+        let mut productions = vec![];
 
         for line in lines.into_iter() {
             productions.append(&mut Self::rules_from_line(line)?);
@@ -22,8 +22,6 @@ impl Grammar {
 
     /// Extract rules from a single line of input
     fn rules_from_line(line: &str) -> Result<Vec<Rule>, InvalidError> {
-        let rules_found = vec![];
-
         // Regex to divide grammar notation into symbols. Based on 
         // https://stackoverflow.com/questions/6462578/regex-to-match-all-instances-not-inside-quotes
         let re = regex::Regex::new(r"'[^']+'|(:|\)\*|\]\*|\)|\]|\(|\[| |\|)").unwrap();

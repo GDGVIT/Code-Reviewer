@@ -45,7 +45,7 @@ impl Node {
             if delim.count == 0 {
                 if val == "(".to_string() || val == "[".to_string() {
                     delim.count += 1;
-                    delim.paren = val;
+                    delim.paren = val.clone();
 
                     if val == "[".to_string() {
                         acc.push(Atom::from_token("(".to_string()));

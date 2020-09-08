@@ -49,12 +49,12 @@ impl Tree {
                     ));
                     
                 } else if !is_prependee_epsilon {
-                    result.push(Atoms::from(prependee.vals));
+                    result.push(Atoms::from(prependee.vals.clone()));
                     result.push(Atoms::from(vec![]));
 
                 } else if !is_adjunct_epsilon {
-                    result.push(Atoms::from(adjunct.vals));
-                    result.push(vec![]);
+                    result.push(Atoms::from(adjunct.vals.clone()));
+                    result.push(Atoms::from(vec![]));
 
                 } else {
                     result.push(Atoms::from(vec![]));
