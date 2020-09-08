@@ -5,6 +5,11 @@ pub struct Atoms {
     pub vals: Vec<Atom>
 }
 
+// Iterator for Atoms
+pub struct AtomsIter<T> {
+    it: T
+}
+
 impl Atoms {
     pub fn from(v: Vec<Atom>) -> Atoms {
         Atoms {
@@ -21,6 +26,12 @@ impl Atoms {
     pub fn from_single_atom(a: Atom) -> Atoms {
         Atoms {
             vals: vec![a]
+        }
+    }
+
+    pub fn iter<'a>(&'a self) -> AtomsIter<impl Iterator<Item=Atom> + 'a> {
+        AtomsIter {
+            it: self.vals.iter().cloned()
         }
     }
 }
@@ -41,5 +52,16 @@ impl fmt::Debug for Atoms {
 impl PartialEq for Atoms {
     fn eq(&self, other: &Self) -> bool {
         format!("{:?}", self) == format!("{:?}", other)
+    }
+}
+
+impl<T> Iterator for AtomsIter<T>
+where
+    T: Iterator<Item = Atom>
+{
+    type Item = Atom;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.it.next()
     }
 }
