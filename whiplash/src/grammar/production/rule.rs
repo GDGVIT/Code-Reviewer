@@ -1,5 +1,5 @@
 use crate::parser::node::nodetype::NodeType;
-use super::atom::Atoms;
+use super::Atoms;
 use std::fmt;
 
 pub struct Rule {
