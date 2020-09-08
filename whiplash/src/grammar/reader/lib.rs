@@ -1,4 +1,4 @@
-use crate::grammar::{production::{self, Rule}, errors::InvalidError, reader::parse_tree::Tree, Grammar};
+use crate::grammar::{production::{self, Rule, Atom}, errors::InvalidError, reader::parse_tree::Tree, Grammar};
 use crate::parser::node::NodeType;
 use crate::lexical_analyser::token::{Token, TokenType};
 use std::fs;
@@ -109,9 +109,19 @@ impl Grammar {
             _ => false
         };
 
-        let is_non_empty = atoms.vals.len() > 2;
+        let is_non_empty = atoms.vals.len() > 1;
 
-        is_first_symbol && is_second_colon && is_non_empty
+        let closure_atoms = [Atom::from_token(")*".to_string()), Atom::from_token("]*".to_string())];
+        let mut contains_closure = false;
+        for atom in atoms.vals.iter() {
+            for closure_atom in &closure_atoms {
+                if closure_atom == atom {
+                    contains_closure = true;
+                }
+            }
+        }
+
+        is_first_symbol && is_second_colon && is_non_empty && !contains_closure
     }
 
     fn atoms_to_rules(mut atoms: production::Atoms) -> Option<Vec<Rule>> {

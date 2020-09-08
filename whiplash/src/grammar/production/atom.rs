@@ -2,7 +2,7 @@ use std::fmt;
 use crate::parser::node::NodeType;
 use crate::lexical_analyser::token::{Token, TokenType};
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum Atom {
     Var(NodeType),
     Tok(Token),
