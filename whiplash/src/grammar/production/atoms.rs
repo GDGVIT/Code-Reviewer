@@ -37,3 +37,9 @@ impl fmt::Debug for Atoms {
         )
     }
 }
+
+impl PartialEq for Atoms {
+    fn eq(&self, other: &Self) -> bool {
+        format!("{:?}", self) == format!("{:?}", other)
+    }
+}
