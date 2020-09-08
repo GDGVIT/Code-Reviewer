@@ -79,7 +79,15 @@ use std::fmt;
 /// vfpdef: NAME
 
 pub struct Grammar {
-    pub rules: Vec<Rule>
+    pub productions: Vec<Rule>
+}
+
+impl Grammar {
+    pub fn from(productions: Vec<Rule>) -> Grammar {
+        Grammar {
+            productions
+        }
+    }
 }
 
 impl fmt::Debug for Grammar {
@@ -87,9 +95,9 @@ impl fmt::Debug for Grammar {
         write!(
             f,
             "{}",
-            &self.rules.iter().fold(
+            &self.productions.iter().fold(
                 String::new(),
-                |acc, rule| acc + &format!("{:?}", &rule)[..] + "\n"
+                |acc, production| acc + &format!("{:?}", &production)[..] + "\n"
             )
         )
     }
