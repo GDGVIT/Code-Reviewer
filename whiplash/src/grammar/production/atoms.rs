@@ -55,6 +55,15 @@ impl PartialEq for Atoms {
     }
 }
 
+impl IntoIterator for Atoms {
+    type Item = Atom;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.vals.into_iter()
+    }
+}
+ 
 impl<T> Iterator for AtomsIter<T>
 where
     T: Iterator<Item = Atom>
