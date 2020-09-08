@@ -1,4 +1,4 @@
-use crate::grammar::{production::{self, Rule}, errors::InvalidError, Grammar};
+use crate::grammar::{production::{self, Rule}, errors::InvalidError, reader::parse_tree::Tree, Grammar};
 use crate::parser::node::NodeType;
 use crate::lexical_analyser::token::{Token, TokenType};
 use std::fs;
@@ -8,12 +8,16 @@ use strum::IntoEnumIterator;
 
 impl Grammar {
     /// Parse a grammar specification file into a grammar
-    pub fn from_file(filename: String) -> Result<(), Box<dyn Error>> {
+    pub fn from_file(filename: String) -> Result<Grammar, Box<dyn Error>> {
         let contents = fs::read_to_string(filename)?;
 
         let lines: Vec<&str> = contents.lines().collect();
+        let productions = vec![];
 
-        Ok(())
+        for line in lines.into_iter() {
+            productions.append(&mut Self::rules_from_line(line)?);
+        }
+        Ok(Grammar::from(productions))
     }
 
     /// Extract rules from a single line of input
@@ -35,8 +39,12 @@ impl Grammar {
             return Err(InvalidError::from(line));
         }
 
-        
-        Ok(rules_found)
+        let rules_found = Self::atoms_to_rules(atoms);
+        if let None = rules_found {
+            return Err(InvalidError::from(line));
+        }
+
+        Ok(rules_found.unwrap())
     }
 
     /// Splits string according to regex and includes delimiters in output
@@ -77,6 +85,10 @@ impl Grammar {
             }
         }
 
+        if lexeme == format!("{:?}", production::Atom::Epsilon) {
+            return production::Atom::Epsilon;
+        }
+
         production::Atom::Tok(
             Token::from(lexeme.to_string())
         )
@@ -104,22 +116,18 @@ impl Grammar {
         is_first_symbol && is_second_colon && is_non_empty
     }
 
-    fn atoms_to_rules(atoms: production::Atoms) -> Option<Vec<Rule>> {
-        let start_symbol = if let production::Atom::Var(sym) = atoms.vals[0] {
+    fn atoms_to_rules(mut atoms: production::Atoms) -> Option<Vec<Rule>> {
+        let first_symbol = atoms.vals.remove(0);
+
+        let start_symbol = if let production::Atom::Var(sym) = first_symbol {
             sym
         } else {
             return None;
         };
 
-        let rhs = production::Atoms::from(
-            atoms.vals[2..].to_vec()
-        );
+        let rhs = production::Atoms::from(atoms.vals[1..].to_vec());
+        let parse_tree = Tree::from(rhs);
 
-        vec![
-            Rule::from(
-                start_symbol, 
-                rhs
-            )
-        ]
+        Some(parse_tree.get_rules(start_symbol))
     }
 }
