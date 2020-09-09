@@ -1,10 +1,11 @@
-use crate::parser::node::node::Node;
-use crate::lexical_analyser::tokenizer::tokenizer::Tokenizer;
-// use crate::lexical_analyser::token::token::Token;
+use crate::grammar::production::Rule;
+use std::fmt;
 
-/// The AST struct implements the following grammar, which is a subset of the grammar found here: https://docs.python.org/3/reference/grammar.html
+/// A subset of the actual python grammar is implemented
+/// Each of the symbols here have a corresponding value in the NodeType enum
+/// 
 /// Grammar: 
-/// The grammar starts at simple_stmt
+/// Start symbol: simple_stmt
 /// simple_stmt: (expr_stmt | flow_stmt)
 /// expr_stmt: testlist_star_expr (annassign | augassign (yield_expr|testlist) |
 ///             [('=' (yield_expr|testlist_star_expr))+ [TYPE_COMMENT]] )
@@ -77,16 +78,27 @@ use crate::lexical_analyser::tokenizer::tokenizer::Tokenizer;
 ///     )
 /// vfpdef: NAME
 
-struct AST {
-    root: Node,
+pub struct Grammar {
+    pub productions: Vec<Rule>
 }
 
-impl AST {
-    pub fn parse_line(&self, line: &str) {
-        let tokenizer = Tokenizer::new();
-        let tokens = tokenizer.parse_line(line);
+impl Grammar {
+    pub fn from(productions: Vec<Rule>) -> Grammar {
+        Grammar {
+            productions
+        }
     }
-
 }
 
-// namedexpr_test, arglist, comp_for 
+impl fmt::Debug for Grammar {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            &self.productions.iter().fold(
+                String::new(),
+                |acc, production| acc + &format!("{:?}", &production)[..] + "\n"
+            )
+        )
+    }
+}

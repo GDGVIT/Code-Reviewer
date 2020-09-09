@@ -1,5 +1,5 @@
 use crate::lexical_analyser::token::tokentype::{TokenType};
-use crate::lexical_analyser::tokenizer::tokenizer::Tokenizer;
+use crate::lexical_analyser::tokenizer::Tokenizer;
 
 #[derive(Debug)]
 #[derive(Clone)]

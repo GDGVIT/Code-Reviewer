@@ -1,3 +1,9 @@
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
+
+#[allow(non_camel_case_types)]
+#[allow(dead_code)]
+#[derive(Debug, Clone, EnumIter, PartialEq)]
 pub enum NodeType {
     simple_stmt,
     expr_stmt,
@@ -28,7 +34,6 @@ pub enum NodeType {
     testlist,
     dictorsetmaker,
     lambdef,
-    testlist,
     star_expr,
     augassign,
     flow_stmt,
