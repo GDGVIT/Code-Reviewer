@@ -1,8 +1,8 @@
 use crate::lexical_analyser::token::token::Token;
-use crate::parser::node::nodetype::NodeType;
+use crate::grammar::Symbol;
 
 pub struct Node {
     pub token: Token,
-    pub category: NodeType,
+    pub category: Symbol,
     pub children: Vec< Box<Node> >,
 }

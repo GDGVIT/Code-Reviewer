@@ -1,5 +1,4 @@
-use crate::grammar::{production::{self, Rule, Atom}, errors::InvalidError, reader::parse_tree::Tree, Grammar};
-use crate::parser::node::NodeType;
+use crate::grammar::{Symbol, production::{self, Rule, Atom}, errors::InvalidError, reader::parse_tree::Tree, Grammar};
 use crate::lexical_analyser::token::{Token, TokenType};
 use std::fs;
 use std::error::Error;
@@ -71,7 +70,7 @@ impl Grammar {
     }
 
     fn atomize(lexeme: &str) -> production::Atom {
-        for ntype in NodeType::iter() {
+        for ntype in Symbol::iter() {
             if stringify!(ntype) == lexeme {
                 return production::Atom::Var(ntype);
             }
@@ -113,9 +112,9 @@ impl Grammar {
 
         let closure_atoms = [Atom::from_token(")*".to_string()), Atom::from_token("]*".to_string())];
         let mut contains_closure = false;
-        for atom in atoms.vals.iter() {
+        for atom in atoms.iter() {
             for closure_atom in &closure_atoms {
-                if closure_atom == atom {
+                if *closure_atom == atom {
                     contains_closure = true;
                 }
             }

@@ -1,10 +1,10 @@
 use std::fmt;
-use crate::parser::node::NodeType;
+use crate::grammar::Symbol;
 use crate::lexical_analyser::token::{Token, TokenType};
 
 #[derive(Clone, PartialEq)]
 pub enum Atom {
-    Var(NodeType),
+    Var(Symbol),
     Tok(Token),
     TokType(TokenType),
     Epsilon

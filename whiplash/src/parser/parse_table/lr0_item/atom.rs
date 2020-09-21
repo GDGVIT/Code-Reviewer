@@ -1,9 +1,9 @@
 use std::fmt;
-use crate::parser::node::nodetype::NodeType;
+use crate::grammar::Symbol;
 use crate::lexical_analyser::token::tokentype::TokenType;
 
 pub enum Atom {
-    Var(NodeType),
+    Var(Symbol),
     Tok(TokenType),
     Dot
 }

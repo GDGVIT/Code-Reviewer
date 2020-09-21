@@ -1,10 +1,10 @@
 // Converts a generated parse tree into a grammar
 use super::{Tree, Node, NodeType};
 use crate::grammar::production::{Atoms, Rule, Atom};
-use crate::parser::node;
+use crate::grammar::Symbol;
 
 impl Tree {
-    pub fn get_rules(self, start_symbol: node::NodeType) -> Vec<Rule> {
+    pub fn get_rules(self, start_symbol: Symbol) -> Vec<Rule> {
         let mut out = vec![];
         let rhs_list = Self::to_rhs_list(self.root);
 

@@ -1,9 +1,9 @@
-use crate::parser::node::nodetype::NodeType;
+use crate::grammar::Symbol;
 use super::atom::Atoms;
 use std::fmt;
 
 pub struct Item {
-    pub lhs: NodeType,
+    pub lhs: Symbol,
     pub rhs: Atoms
 }
 
