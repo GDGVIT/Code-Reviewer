@@ -1,22 +1,6 @@
 use std::fmt;
 use std::hash::Hash;
-use crate::grammar::Symbol;
-use crate::lexical_analyser::token::tokentype::TokenType;
-
-#[derive(Hash)]
-pub enum Atom {
-    Var(Symbol),
-    Tok(TokenType)
-}
-
-impl fmt::Debug for Atom {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match &self {
-            Atom::Var(a) => write!(f, "{:?}", a),
-            Atom::Tok(a) => write!(f, "{:?}", a)
-        }
-    }
-}
+use crate::grammar::production::Atom;
 
 #[derive(Hash)]
 pub struct Atoms {
@@ -33,5 +17,13 @@ impl fmt::Debug for Atoms {
                 |acc, atom| acc + "/" + &format!("{:?}", atom)[..]
             )
         )
+    }
+}
+
+impl Atoms {
+    pub fn from(vals: Vec<Atom>) -> Atoms {
+        Atoms {
+            vals
+        }
     }
 }
