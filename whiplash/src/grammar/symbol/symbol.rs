@@ -1,9 +1,11 @@
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
+use std::hash::Hash;
+
 #[allow(non_camel_case_types)]
 #[allow(dead_code)]
-#[derive(Debug, Clone, EnumIter, PartialEq)]
+#[derive(Debug, Clone, Hash, EnumIter, PartialEq)]
 pub enum Symbol {
     simple_stmt,
     expr_stmt,
