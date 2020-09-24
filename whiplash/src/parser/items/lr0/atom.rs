@@ -3,20 +3,19 @@ use std::hash::Hash;
 
 use crate::grammar::Symbol;
 use crate::lexical_analyser::token::tokentype::TokenType;
+use crate::grammar::production;
 
 #[derive(Hash)]
 pub enum Atom {
-    Var(Symbol),
-    Tok(TokenType),
+    Val(production::Atom),
     Dot
 }
 
 impl fmt::Debug for Atom {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match &self {
-            Atom::Var(a) => write!(f, "{:?}", a),
-            Atom::Tok(a) => write!(f, "{:?}", a),
-            Atom::Dot => write!(f, ".")
+            Self::Val(a) => write!(f, "{:?}", a),
+            Self::Dot => write!(f, ".")
         }
     }
 }
