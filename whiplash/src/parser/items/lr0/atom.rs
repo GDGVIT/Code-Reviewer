@@ -1,47 +1,32 @@
 use std::fmt;
 use std::hash::Hash;
-
-use crate::grammar::Symbol;
-use crate::lexical_analyser::token::tokentype::TokenType;
-use crate::grammar::production;
-
-#[derive(Hash)]
-pub enum Atom {
-    Val(production::Atom),
-    Dot
-}
-
-impl fmt::Debug for Atom {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match &self {
-            Self::Val(a) => write!(f, "{:?}", a),
-            Self::Dot => write!(f, ".")
-        }
-    }
-}
+use crate::grammar::production::Atom;
 
 #[derive(Hash)]
 pub struct Atoms {
-    vals: Vec<Atom>
+    pub vals: Vec<Atom>,
+    pub head: usize
 }
 
 impl Atoms {
     pub fn from(v: Vec<Atom>) -> Atoms {
         Atoms {
-            vals: v
+            vals: v,
+            head: 0
         }
     }
 }
 
 impl fmt::Debug for Atoms {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{}",
-            &self.vals.iter().fold(
-                String::new(), 
-                |acc, atom| acc + &format!("{:?}", &atom)[..] + " "
-            )
-        )
+        let mut out = "";
+        for (i, atom) in self.vals.iter().enumerate() {
+            if i == self.head {
+                out = &format!("{} .", out);
+            }
+            out = &format!("{} {:?}", out, atom);
+        }
+
+        write!(f, "{}", out)
     }
 }

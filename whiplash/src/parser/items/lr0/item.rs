@@ -1,7 +1,7 @@
 use crate::grammar::Symbol;
-use super::atom::{Atoms, Atom};
-use std::fmt;
 use crate::grammar::production::Rule;
+use super::atom::Atoms;
+use std::fmt;
 
 #[derive(Hash)]
 pub struct Item {
@@ -18,13 +18,7 @@ impl fmt::Debug for Item {
 impl Item {
     pub fn production_to_initial_item(rule: &Rule) -> Self {
         let lhs = rule.start_symbol.clone();
-        let mut rhs = vec![Atom::Dot];
-
-        for val in rule.rhs.vals.iter() {
-            rhs.push(Atom::Val(val.clone()));
-        }
-
-        let rhs = Atoms::from(rhs);
+        let rhs: Atoms = Atoms::from(rule.rhs.vals.clone());
 
         Item {
             lhs,
