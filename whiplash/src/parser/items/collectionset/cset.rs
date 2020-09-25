@@ -1,6 +1,6 @@
 use super::super::collection::ItemCollection;
-// use crate::grammar::Grammar;
+use std::collections::HashSet;
 
 pub struct CollectionSet {
-    pub members: ItemCollection
+    pub members: HashSet<ItemCollection>
 }
