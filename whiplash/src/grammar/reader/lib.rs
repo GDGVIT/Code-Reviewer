@@ -1,4 +1,4 @@
-use crate::grammar::{Symbol, production::{self, Rule, Atom}, errors::InvalidError, reader::parse_tree::Tree, Grammar};
+use crate::grammar::{Symbol, production::{self, Rule, Atom, Atoms, Terminal, NonTerminal}, errors::InvalidError, reader::parse_tree::Tree, Grammar};
 use crate::lexical_analyser::token::{Token, TokenType};
 use std::fs;
 use std::error::Error;
@@ -69,36 +69,36 @@ impl Grammar {
         result
     }
 
-    fn atomize(lexeme: &str) -> production::Atom {
+    fn atomize(lexeme: &str) -> Atom {
         for ntype in Symbol::iter() {
             if stringify!(ntype) == lexeme {
-                return production::Atom::Var(ntype);
+                return Atom::NonTerm(NonTerminal::Sym(ntype));
             }
         }
 
         for ttype in TokenType::iter() {
             if stringify!(ttype) == lexeme {
-                return production::Atom::TokType(ttype);
+                return Atom::NonTerm(NonTerminal::TokType(ttype));
             }
         }
 
-        if lexeme == format!("{:?}", production::Atom::Epsilon) {
-            return production::Atom::Epsilon;
+        if lexeme == format!("{:?}", Terminal::Epsilon) {
+            return Atom::Term(Terminal::Epsilon);
         }
 
-        production::Atom::Tok(
+        Atom::Term(Terminal::Tok(
             Token::from(lexeme.to_string())
-        )
+        ))
     } 
 
-    fn check_valid(atoms: &production::Atoms) -> bool {
+    fn check_valid(atoms: &Atoms) -> bool {
         let is_first_symbol = match atoms.vals[0] {
-            production::Atom::Var(_) => true,
+            Atom::NonTerm(NonTerminal::Sym(_)) => true,
             _ => false
         };
 
         let is_second_colon = match &atoms.vals[1] {
-            production::Atom::Tok(t) => {
+            Atom::Term(Terminal::Tok(t)) => {
                 if *t == Token::from(":".to_string()) {
                     true
                 } else {
@@ -123,16 +123,16 @@ impl Grammar {
         is_first_symbol && is_second_colon && is_non_empty && !contains_closure
     }
 
-    fn atoms_to_rules(mut atoms: production::Atoms) -> Option<Vec<Rule>> {
+    fn atoms_to_rules(mut atoms: Atoms) -> Option<Vec<Rule>> {
         let first_symbol = atoms.vals.remove(0);
 
-        let start_symbol = if let production::Atom::Var(sym) = first_symbol {
+        let start_symbol = if let Atom::NonTerm(NonTerminal::Sym(sym)) = first_symbol {
             sym
         } else {
             return None;
         };
 
-        let rhs = production::Atoms::from(atoms.vals[1..].to_vec());
+        let rhs = Atoms::from(atoms.vals[1..].to_vec());
         let parse_tree = Tree::from(rhs);
 
         Some(parse_tree.get_rules(start_symbol))

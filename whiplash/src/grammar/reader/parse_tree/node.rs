@@ -68,7 +68,7 @@ impl Node {
                         if val == "]".to_string() {
                             acc.push(Atom::from_token(")".to_string()));
                             acc.push(Atom::from_token("|".to_string()));
-                            acc.push(Atom::Epsilon);
+                            acc.push(Atom::from_epsilon());
                         }
                         result.children.push(
                             Box::new(

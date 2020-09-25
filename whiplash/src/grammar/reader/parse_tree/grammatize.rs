@@ -1,6 +1,6 @@
 // Converts a generated parse tree into a grammar
 use super::{Tree, Node, NodeType};
-use crate::grammar::production::{Atoms, Rule, Atom};
+use crate::grammar::production::{Atoms, Rule, Atom, Terminal};
 use crate::grammar::Symbol;
 
 impl Tree {
@@ -40,8 +40,8 @@ impl Tree {
         for prependee in &accumulated {
             for adjunct in &adjuncts {
                 // Check if adjunct or prependee are epsilon
-                let is_adjunct_epsilon = *adjunct == Atoms::from_single_atom(Atom::Epsilon);
-                let is_prependee_epsilon = *prependee == Atoms::from_single_atom(Atom::Epsilon);
+                let is_adjunct_epsilon = *adjunct == Atoms::from_single_atom(Atom::Term(Terminal::Epsilon));
+                let is_prependee_epsilon = *prependee == Atoms::from_single_atom(Atom::Term(Terminal::Epsilon));
 
                 if !is_adjunct_epsilon && !is_prependee_epsilon {
                     result.push(Atoms::from(
