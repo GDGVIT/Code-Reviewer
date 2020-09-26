@@ -2,6 +2,7 @@ use crate::grammar::Symbol;
 use super::Atoms;
 use std::fmt;
 
+#[derive(Clone)]
 pub struct Rule {
     pub start_symbol: Symbol,
     pub rhs: Atoms

@@ -2,6 +2,7 @@ use super::Atom;
 use std::fmt;
 use std::ops::{Index, IndexMut};
 
+#[derive(Clone)]
 pub struct Atoms {
     pub vals: Vec<Atom>
 }

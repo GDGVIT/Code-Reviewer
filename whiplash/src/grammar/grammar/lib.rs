@@ -1,5 +1,5 @@
 use crate::grammar::production::{Rule, Atom};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::ops::{Index, IndexMut};
 
@@ -81,14 +81,22 @@ use std::ops::{Index, IndexMut};
 /// vfpdef: NAME
 
 pub struct Grammar {
-    pub productions: Vec<Rule>
+    pub productions: Vec<Rule>,
+    pub FIRST: HashMap<Atom, HashSet<Atom>>,
+    pub FOLLOW: HashMap<Atom, HashSet<Atom>>
 }
 
 impl Grammar {
     pub fn from(productions: Vec<Rule>) -> Grammar {
-        Grammar {
-            productions
-        }
+        let mut out = Grammar {
+            productions,
+            FIRST: HashMap::new(),
+            FOLLOW: HashMap::new()
+        };
+        out.FIRST = out.get_FIRST();
+        out.FOLLOW = out.get_FOLLOW();
+        
+        out
     }
 
     pub fn get_all_atoms(&self) -> HashSet<Atom> {
