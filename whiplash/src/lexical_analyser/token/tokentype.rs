@@ -3,7 +3,7 @@ use strum_macros::EnumIter;
 
 use std::hash::Hash;
 
-#[derive(PartialEq, Hash, Copy, Clone, Debug, EnumIter)]
+#[derive(PartialEq, Hash, Copy, Clone, Debug, EnumIter, Eq)]
 pub enum TokenType {
     OP,         // Operator
     NUM,        // Numeric value
