@@ -1,6 +1,7 @@
 use crate::grammar::production::{Rule, Atom};
 use std::collections::HashSet;
 use std::fmt;
+use std::ops::{Index, IndexMut};
 
 /// A subset of the actual python grammar is implemented
 /// Each of the symbols here have a corresponding value in the NodeType enum
@@ -115,5 +116,19 @@ impl fmt::Debug for Grammar {
                 |acc, production| acc + &format!("{:?}", &production)[..] + "\n"
             )
         )
+    }
+}
+
+impl Index<usize> for Grammar {
+    type Output = Rule;
+
+    fn index(&self, i: usize) -> &Self::Output {
+        &self.productions[i]
+    }
+}
+
+impl IndexMut<usize> for Grammar {
+    fn index_mut(&mut self, i: usize) -> &mut Self::Output {
+        &mut self.productions[i]
     }
 }
