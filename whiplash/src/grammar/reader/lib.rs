@@ -110,7 +110,7 @@ impl Grammar {
 
         let is_non_empty = atoms.vals.len() > 1;
 
-        let closure_atoms = [Atom::from_token(")*".to_string()), Atom::from_token("]*".to_string())];
+        let closure_atoms = [Atom::from_token(&")*".to_string()), Atom::from_token(&"]*".to_string())];
         let mut contains_closure = false;
         for atom in atoms.iter() {
             for closure_atom in &closure_atoms {

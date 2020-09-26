@@ -2,19 +2,19 @@ use std::fmt;
 use crate::grammar::Symbol;
 use crate::lexical_analyser::token::{Token, TokenType};
 
-#[derive(Clone, PartialEq, Hash)]
+#[derive(Clone, PartialEq, Hash, Eq)]
 pub enum Terminal {
     Tok(Token),
     Epsilon
 }
 
-#[derive(Clone, PartialEq, Hash)]
+#[derive(Clone, PartialEq, Hash, Eq)]
 pub enum NonTerminal {
     Sym(Symbol),
     TokType(TokenType)
 }
 
-#[derive(Clone, PartialEq, Hash)]
+#[derive(Clone, PartialEq, Hash, Eq)]
 pub enum Atom {
     Term(Terminal),
     NonTerm(NonTerminal)
@@ -30,10 +30,10 @@ impl Atom {
         None
     }
 
-    pub fn from_token(tok: String) -> Atom {
+    pub fn from_token(tok: &String) -> Atom {
         Atom::Term(
             Terminal::Tok(
-                Token::from(tok)
+                Token::from(tok.clone())
             )
         )
     }
@@ -41,6 +41,22 @@ impl Atom {
     pub fn from_epsilon() -> Atom {
         Atom::Term(
             Terminal::Epsilon
+        )
+    }
+
+    pub fn from_symbol(sym: &Symbol) -> Atom {
+        Atom::NonTerm(
+            NonTerminal::Sym(
+                sym.clone()
+            )
+        )
+    }
+
+    pub fn from_token_type(ttype: &TokenType) -> Atom {
+        Atom::NonTerm(
+            NonTerminal::TokType(
+                ttype.clone()
+            )
         )
     }
     

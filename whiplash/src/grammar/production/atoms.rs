@@ -1,5 +1,6 @@
 use super::Atom;
 use std::fmt;
+use std::ops::{Index, IndexMut};
 
 pub struct Atoms {
     pub vals: Vec<Atom>
@@ -19,7 +20,7 @@ impl Atoms {
 
     pub fn from_single_token(tok: String) -> Atoms {
         Atoms {
-            vals: vec![Atom::from_token(tok)]
+            vals: vec![Atom::from_token(&tok)]
         }
     }
 
@@ -72,5 +73,19 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         self.it.next()
+    }
+}
+
+impl Index<usize> for Atoms {
+    type Output = Atom;
+
+    fn index(&self, i: usize) -> &Self::Output {
+        &self.vals[i]
+    }
+}
+
+impl IndexMut<usize> for Atoms {
+    fn index_mut(&mut self, i: usize) -> &mut Self::Output {
+        &mut self.vals[i]
     }
 }

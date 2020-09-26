@@ -48,7 +48,7 @@ impl Node {
                     delim.paren = val.clone();
 
                     if val == "[".to_string() {
-                        acc.push(Atom::from_token("(".to_string()));
+                        acc.push(Atom::from_token(&"(".to_string()));
                     }
                 } else {
                     result.children.push(
@@ -66,8 +66,8 @@ impl Node {
                     delim.count -= 1;
                     if delim.count == 0 {
                         if val == "]".to_string() {
-                            acc.push(Atom::from_token(")".to_string()));
-                            acc.push(Atom::from_token("|".to_string()));
+                            acc.push(Atom::from_token(&")".to_string()));
+                            acc.push(Atom::from_token(&"|".to_string()));
                             acc.push(Atom::from_epsilon());
                         }
                         result.children.push(
