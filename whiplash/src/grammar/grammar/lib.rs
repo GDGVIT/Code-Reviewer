@@ -104,6 +104,12 @@ impl Grammar {
 
         out
     } 
+
+    pub fn iter<'a>(&'a self) -> GrammarIter<impl Iterator<Item=Rule> + 'a> {
+        GrammarIter {
+            it: self.productions.iter().cloned()
+        }
+    }
 }
 
 impl fmt::Debug for Grammar {
@@ -130,5 +136,29 @@ impl Index<usize> for Grammar {
 impl IndexMut<usize> for Grammar {
     fn index_mut(&mut self, i: usize) -> &mut Self::Output {
         &mut self.productions[i]
+    }
+}
+
+pub struct GrammarIter<T> {
+    it: T
+}
+
+impl<T> Iterator for GrammarIter<T>
+where
+    T: Iterator<Item=Rule> 
+{
+    type Item = Rule;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.it.next()
+    }
+}
+
+impl IntoIterator for Grammar{
+    type Item = Rule;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.productions.into_iter()
     }
 }
