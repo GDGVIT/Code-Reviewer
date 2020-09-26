@@ -5,7 +5,7 @@ use std::hash::Hash;
 
 #[allow(non_camel_case_types)]
 #[allow(dead_code)]
-#[derive(Debug, Clone, Hash, EnumIter, PartialEq)]
+#[derive(Debug, Clone, Hash, EnumIter, PartialEq, Eq)]
 pub enum Symbol {
     simple_stmt,
     expr_stmt,

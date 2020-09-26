@@ -1,4 +1,5 @@
-use crate::grammar::production::Rule;
+use crate::grammar::production::{Rule, Atom};
+use std::collections::HashSet;
 use std::fmt;
 
 /// A subset of the actual python grammar is implemented
@@ -88,6 +89,20 @@ impl Grammar {
             productions
         }
     }
+
+    pub fn get_all_atoms(&self) -> HashSet<Atom> {
+        let mut out = HashSet::new();
+        
+        for rule in &self.productions {
+            out.insert(Atom::from_symbol(&rule.start_symbol));
+
+            for atom in rule.rhs.iter() {
+                out.insert(atom.clone());
+            }
+        }
+
+        out
+    } 
 }
 
 impl fmt::Debug for Grammar {
