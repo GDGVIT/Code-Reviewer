@@ -1,8 +1,7 @@
 use crate::lexical_analyser::token::tokentype::{TokenType};
 use crate::lexical_analyser::tokenizer::Tokenizer;
 
-#[derive(Debug)]
-#[derive(Clone)]
+#[derive(Clone, Debug, Hash, Eq)]
 pub struct Token {
     pub category: TokenType,
     pub value: String,

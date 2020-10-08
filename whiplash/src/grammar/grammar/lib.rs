@@ -1,5 +1,7 @@
-use crate::grammar::production::Rule;
+use crate::grammar::production::{Rule, Atom};
+use std::collections::{HashMap, HashSet};
 use std::fmt;
+use std::ops::{Index, IndexMut};
 
 /// A subset of the actual python grammar is implemented
 /// Each of the symbols here have a corresponding value in the NodeType enum
@@ -79,13 +81,41 @@ use std::fmt;
 /// vfpdef: NAME
 
 pub struct Grammar {
-    pub productions: Vec<Rule>
+    pub productions: Vec<Rule>,
+    pub FIRST: HashMap<Atom, HashSet<Atom>>,
+    pub FOLLOW: HashMap<Atom, HashSet<Atom>>
 }
 
 impl Grammar {
     pub fn from(productions: Vec<Rule>) -> Grammar {
-        Grammar {
-            productions
+        let mut out = Grammar {
+            productions,
+            FIRST: HashMap::new(),
+            FOLLOW: HashMap::new()
+        };
+        out.FIRST = out.get_FIRST();
+        out.FOLLOW = out.get_FOLLOW();
+        
+        out
+    }
+
+    pub fn get_all_atoms(&self) -> HashSet<Atom> {
+        let mut out = HashSet::new();
+        
+        for rule in &self.productions {
+            out.insert(Atom::from_symbol(&rule.start_symbol));
+
+            for atom in rule.rhs.iter() {
+                out.insert(atom.clone());
+            }
+        }
+
+        out
+    } 
+
+    pub fn iter<'a>(&'a self) -> GrammarIter<impl Iterator<Item=Rule> + 'a> {
+        GrammarIter {
+            it: self.productions.iter().cloned()
         }
     }
 }
@@ -100,5 +130,43 @@ impl fmt::Debug for Grammar {
                 |acc, production| acc + &format!("{:?}", &production)[..] + "\n"
             )
         )
+    }
+}
+
+impl Index<usize> for Grammar {
+    type Output = Rule;
+
+    fn index(&self, i: usize) -> &Self::Output {
+        &self.productions[i]
+    }
+}
+
+impl IndexMut<usize> for Grammar {
+    fn index_mut(&mut self, i: usize) -> &mut Self::Output {
+        &mut self.productions[i]
+    }
+}
+
+pub struct GrammarIter<T> {
+    it: T
+}
+
+impl<T> Iterator for GrammarIter<T>
+where
+    T: Iterator<Item=Rule> 
+{
+    type Item = Rule;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.it.next()
+    }
+}
+
+impl IntoIterator for Grammar{
+    type Item = Rule;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.productions.into_iter()
     }
 }

@@ -1,8 +1,9 @@
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
-#[derive(Debug)]
-#[derive(PartialEq, Copy, Clone, EnumIter)]
+use std::hash::Hash;
+
+#[derive(PartialEq, Hash, Copy, Clone, Debug, EnumIter, Eq)]
 pub enum TokenType {
     OP,         // Operator
     NUM,        // Numeric value

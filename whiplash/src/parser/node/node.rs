@@ -1,5 +1,5 @@
 use crate::lexical_analyser::token::token::Token;
-use crate::parser::node::nodetype::NodeType;
+use super::NodeType;
 
 pub struct Node {
     pub token: Token,

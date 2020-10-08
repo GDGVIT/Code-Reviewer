@@ -1,9 +1,10 @@
-use crate::parser::node::nodetype::NodeType;
+use crate::grammar::Symbol;
 use super::Atoms;
 use std::fmt;
 
+#[derive(Clone)]
 pub struct Rule {
-    pub start_symbol: NodeType,
+    pub start_symbol: Symbol,
     pub rhs: Atoms
 }
 
@@ -14,7 +15,7 @@ impl fmt::Debug for Rule {
 }
 
 impl Rule {
-    pub fn from(start_symbol: NodeType, rhs: Atoms) -> Rule {
+    pub fn from(start_symbol: Symbol, rhs: Atoms) -> Rule {
         Rule {
             start_symbol,
             rhs
